@@ -3,6 +3,7 @@
 var RouteRecognizer = require('route-recognizer');
 var FakeXMLHttpRequest = require('fake-xml-http-request');
 var createFetch = require('fetchme');
+var urlLib = require('url');
 
 /**
  * parseURL - decompose a URL into its parts
@@ -22,11 +23,7 @@ var createFetch = require('fetchme');
  * }
  */
 function parseURL(url) {
-  // TODO: something for when document isn't present... #yolo
-  var anchor = document.createElement('a');
-  anchor.href = url;
-  anchor.fullpath = anchor.pathname + (anchor.search || '') + (anchor.hash || '');
-  return anchor;
+  return urlLib.parse(url);
 }
 
 
