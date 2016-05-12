@@ -1,3 +1,11 @@
+# A library for mock HTTP requests
+
+This is forked from the excellent [pretender](https://github.com/pretenderjs/pretender) project. The difference is that this version doesn't require a browser (can be run for testing in, say, Mocha or in ReactNative) and it supports `fetch` using [this ployfill](https://github.com/sstur/fetch).
+
+We use this with a fork of [pretender](https://github.com/sstur/pretender) for testing our the data fetching logic around our UI.
+
+The original readme follows (with minor adjustments to the example code):
+
 # Pretender
 
 [![Build Status](https://travis-ci.org/pretenderjs/pretender.svg)](https://travis-ci.org/pretenderjs/pretender)
@@ -13,29 +21,29 @@ Pretender will temporarily replace the native XMLHttpRequest object, intercept a
 to little pretend service you've defined.
 
 ```javascript
-var PHOTOS = {
-  "10": {
+let PHOTOS = {
+  '10': {
     id: 10,
     src: 'http://media.giphy.com/media/UdqUo8xvEcvgA/giphy.gif'
   },
-  "42": {
+  '42': {
     id: 42,
     src: 'http://media0.giphy.com/media/Ko2pyD26RdYRi/giphy.gif'
   }
 };
 
-var server = new Pretender(function(){
-  this.get('/photos', function(request){
-    var all =  JSON.stringify(Object.keys(PHOTOS).map(function(k){return PHOTOS[k]}))
-    return [200, {"Content-Type": "application/json"}, all]
-  });
+let server = new Pretender();
 
-  this.get('/photos/:id', function(request){
-    return [200, {"Content-Type": "application/json"}, JSON.stringify(PHOTOS[request.params.id])]
-  });
+server.get('/photos', (request) => {
+  let all =  JSON.stringify(Object.keys(PHOTOS).map((k) => PHOTOS[k]));
+  return [200, {'Content-Type': 'application/json'}, all];
 });
 
-$.get('/photos/12', {success: function(){ ... }})
+server.get('/photos/:id', (request) => {
+  return [200, {'Content-Type': 'application/json'}, JSON.stringify(PHOTOS[request.params.id])];
+});
+
+$.get('/photos/12', {success: () => { /* ... */ }});
 ```
 
 
@@ -48,48 +56,33 @@ single argument (the XMLHttpRequest instance that triggered this request) and mu
 containing the HTTP status code, headers object, and body as a string.
 
 ```javascript
-var server = new Pretender(function(){
-  this.put('/api/songs/99', function(request){
-    return [404, {}, ""];
-  });
+server.put('/api/songs/99', (request) => {
+  return [404, {}, ''];
 });
-
-```
-
-a Pretender constructor can take multiple maps:
-
-```javascript
-import adminMaps from "testing/maps/admin";
-import photoMaps from "testing/maps/photos";
-
-var server = new Pretender(photoMaps, adminMaps);
 
 ```
 
 The HTTP verb methods can also be called on an instance individually:
 
 ```javascript
-var server = new Pretender();
-server.put('/api/songs/99', function(request){
-  return [404, {}, ""];
+server.put('/api/songs/99', (request) => {
+  return [404, {}, ''];
 });
 
 ```
 
 ### Paths
-Paths can either be hard-coded (`this.get('/api/songs/12')`) or contain dynamic segments
-(`this.get('/api/songs/:song_id'`). If there were dynamic segments of the path,
+Paths can either be hard-coded (`server.get('/api/songs/12')`) or contain dynamic segments
+(`server.get('/api/songs/:song_id'`). If there were dynamic segments of the path,
 these well be attached to the request object as a `params` property with keys matching
 the dynamic portion and values with the matching value from the path.
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/api/songs/:song_id', function(request){
-    request.params.song_id;
-  });
+server.get('/api/songs/:song_id', (request) => {
+  request.params.song_id;
 });
 
-$.get('/api/songs/871') // params.song_id will be '871'
+$.get('/api/songs/871'); // params.song_id will be '871'
 
 ```
 
@@ -98,10 +91,8 @@ If there were query parameters in the request, these well be attached to the req
 property.
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/api/songs', function(request){
-    request.queryParams.sortOrder;
-  });
+server.get('/api/songs', (request) => {
+  request.queryParams.sortOrder;
 });
 
 // typical jQuery-style uses you've probably seen.
@@ -117,14 +108,12 @@ You must return an array from this handler that includes the HTTP status code, a
 of response headers, and a string body.
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/api/songs', function(request){
-    return [
-      200,
-      {'content-type': 'application/javascript'},
-      '[{"id": 12}, {"id": 14}]'
-    ];
-  });
+server.get('/api/songs', (request) => {
+  return [
+    200,
+    {'content-type': 'application/javascript'},
+    '[{"id": 12}, {"id": 14}]'
+  ];
 });
 ```
 
@@ -133,9 +122,7 @@ You can specify paths that should be ignored by pretender and made as real XHR r
 Enable these by specifying pass-through routes with `pretender.passthrough`:
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/photos/:id', this.passthrough);
-});
+server.get('/photos/:id', server.passthrough);
 ```
 
 ### Timing Parameter
@@ -145,34 +132,26 @@ synchronously, after a defined amount of time, or never (i.e., it needs to be ma
 
 **Default**
 ```javascript
-var server = new Pretender(function(){
-  // songHandler will execute the frame after receiving a request (async)
-  this.get('/api/songs', songHandler);
-});
+// songHandler will execute the frame after receiving a request (async)
+server.get('/api/songs', songHandler);
 ```
 
 **Synchronous**
 ```javascript
-var server = new Pretender(function(){
-  // songHandler will execute immediately after receiving a request (sync)
-  this.get('/api/songs', songHandler, false);
-});
+// songHandler will execute immediately after receiving a request (sync)
+server.get('/api/songs', songHandler, false);
 ```
 
 **Delay**
 ```javascript
-var server = new Pretender(function(){
-  // songHandler will execute two seconds after receiving a request (async)
-  this.get('/api/songs', songHandler, 2000);
-});
+// songHandler will execute two seconds after receiving a request (async)
+server.get('/api/songs', songHandler, 2000);
 ```
 
 **Manual**
 ```javascript
-var server = new Pretender(function(){
-  // songHandler will only execute once you manually resolve the request
-  this.get('/api/songs', songHandler, true);
-});
+// songHandler will only execute once you manually resolve the request
+server.get('/api/songs', songHandler, true);
 
 // resolve a request like this
 server.resolve(theXMLHttpRequestThatRequestedTheSongsRoute);
@@ -183,7 +162,7 @@ You may want the timing behavior of a response to change from request to request
 done by providing a function as the timing parameter.
 
 ```javascript
-var externalState = 'idle';
+let externalState = 'idle';
 
 function throttler() {
   if (externalState === 'OH NO DDOS ATTACK') {
@@ -191,10 +170,8 @@ function throttler() {
   }
 }
 
-var server = new Pretender(function(){
-  // songHandler will only execute based on the result of throttler
-  this.get('/api/songs', songHandler, throttler);
-});
+// songHandler will only execute based on the result of throttler
+server.get('/api/songs', songHandler, throttler);
 ```
 
 Now whenever the songs route is requested, its timing behavior will be determined by the result
@@ -210,12 +187,12 @@ sets of routes between tests:
 
 ```javascript
 export function authenticationRoutes(){
-  this.post('/authenticate', function(){ ... });
-  this.post('/signout', function(){ ... });
+  server.post('/authenticate', () => { ... });
+  server.post('/signout', () => { ... });
 }
 
 export function songsRoutes(){
-  this.get('/api/songs', function(){ ... });
+  server.get('/api/songs', () => { ... });
 }
 ```
 
@@ -223,12 +200,12 @@ export function songsRoutes(){
 ```javascript
 // a test
 
-import {authenticationRoutes, songsRoutes} from "../shared/routes";
-import Pretender from "pretender";
+import {authenticationRoutes, songsRoutes} from '../shared/routes';
+import Pretender from 'pretender';
 
-let p = new Pretender();
-p.map(authenticationRoutes);
-p.map(songsRoutes);
+let server = new Pretender();
+server.map(authenticationRoutes);
+server.map(songsRoutes);
 ```
 
 ## Hooks
@@ -238,17 +215,15 @@ the HTTP `verb`, `path`, and original `request`. By default this method does not
 override this method to supply your own behavior like logging or test framework integration:
 
 ```javascript
-var server = new Pretender(function(){
-  this.put('/api/songs/:song_id', function(request){
-    return [202, {"Content-Type": "application/json"}, "{}"]
-  });
+server.put('/api/songs/:song_id', (request) => {
+  return [202, {'Content-Type': 'application/json'}, '{}']
 });
 
-server.handledRequest = function(verb, path, request) {
-  console.log("a request was responded to");
+server.handledRequest = (verb, path, request) => {
+  console.log('a request was responded to');
 }
 
-$.getJSON("/api/songs/12");
+$.getJSON('/api/songs/12');
 ```
 
 ### Unhandled Requests
@@ -257,26 +232,21 @@ object if your server receives a request for a route that doesn't have a handler
 will throw an error. You can override this method to supply your own behavior:
 
 ```javascript
-var server = new Pretender(function(){
-  // no routes
-});
-
-server.unhandledRequest = function(verb, path, request) {
+// no routes
+server.unhandledRequest = (verb, path, request) => {
   console.log("what is this I don't even...");
 }
 
-$.getJSON("/these/arent/the/droids");
+$.getJSON('/these/arent/the/droids');
 ```
 
 ### Pass-through Requests
 Requests set to be handled by pass-through will trigger the `passthroughRequest` hook:
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/some/path', this.passthrough);
-});
+server.get('/some/path', server.passthrough);
 
-server.passthroughRequest = function(verb, path, request) {
+server.passthroughRequest = (verb, path, request) => {
   console.log('request ' + path + ' sucessfully sent for passthrough');
 }
 ```
@@ -290,15 +260,13 @@ By default, this will augment the error message with some information about whic
 the error and then throw the error again. You can override this method to supply your own behavior:
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/api/songs', function(request){
-    undefinedWAT("this is no function!");
-  });
+server.get('/api/songs', (request) => {
+  undefinedWAT('this is no function!');
 });
 
-server.erroredRequest = function(verb, path, request, error) {
+server.erroredRequest = (verb, path, request, error) => {
   SomeTestFramework.failTest();
-  console.warn("There was an error", error);
+  console.warn('There was an error', error);
 }
 ```
 
@@ -307,8 +275,8 @@ Pretender is response format neutral, so you normally need to supply a string bo
 third part of a response:
 
 ```javascript
-this.get('/api/songs', function(request){
-  return [200, {}, "{'id': 12}"];
+server.get('/api/songs', (request) => {
+  return [200, {}, '{"id": 12}'];
 });
 ```
 
@@ -318,13 +286,11 @@ going to be JSON. The body of a response will be passed through a
 `prepareBody` defaults to an empty function, but can be overriden:
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/api/songs', function(request){
-    return [200, {}, {id: 12}];
-  });
+server.get('/api/songs', (request) => {
+  return [200, {}, {id: 12}];
 });
 
-server.prepareBody = function(body){
+server.prepareBody = (body) => {
   return body ? JSON.stringify(body) : '{"error": "not found"}';
 }
 ```
@@ -334,13 +300,11 @@ Response headers can be mutated for the entire service instance by implementing 
 `prepareHeaders` method:
 
 ```javascript
-var server = new Pretender(function(){
-  this.get('/api/songs', function(request){
-    return [200, {}, '{"id": 12}'];
-  });
+server.get('/api/songs', (request) => {
+  return [200, {}, '{"id": 12}'];
 });
 
-server.prepareHeaders = function(headers){
+server.prepareHeaders = (headers) => {
   headers['content-type'] = 'application/javascript';
   return headers;
 };
@@ -358,10 +322,8 @@ Each handler keeps a count of the number of requests is successfully served.
 When you're done mocking, be sure to call `shutdown()` to restore the native XMLHttpRequest object:
 
 ```javascript
-var server = new Pretender(function(){
- ... routing ...
-});
-
+let server = new Pretender();
+// ... add routes ...
 server.shutdown(); // all done.
 ```
 
