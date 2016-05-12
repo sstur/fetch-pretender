@@ -1,18 +1,12 @@
 # A library for mock HTTP requests
 
-This is forked from the excellent [pretender](https://github.com/pretenderjs/pretender) project. The difference is that this version doesn't require a browser (can be run for testing in, say, Mocha or in ReactNative) and it supports `fetch` using [this ployfill](https://github.com/sstur/fetch).
+This is forked from the excellent [pretender](https://github.com/pretenderjs/pretender) project. The difference is that this version doesn't require a browser (can be run for testing in, say, Mocha or in ReactNative) and it supports `fetch` using [this ployfill](https://github.com/sstur/fetchme).
 
-We use this with a fork of [pretender](https://github.com/sstur/pretender) for testing our the data fetching logic around our UI.
+We use [fetch-pretender](https://github.com/sstur/fetch-pretender) for testing our the data fetching logic around our UI.
 
 The original readme follows (with minor adjustments to the example code):
 
 # Pretender
-
-[![Build Status](https://travis-ci.org/pretenderjs/pretender.svg)](https://travis-ci.org/pretenderjs/pretender)
-[![Coverage Status](https://coveralls.io/repos/pretenderjs/pretender/badge.svg?branch=master&service=github)](https://coveralls.io/github/pretenderjs/pretender?branch=master)
-[![Dependency Status](https://david-dm.org/pretenderjs/pretender.svg)](https://david-dm.org/pretenderjs/pretender)
-[![devDependency Status](https://david-dm.org/pretenderjs/pretender/dev-status.svg)](https://david-dm.org/pretenderjs/pretender#info=devDependencies)
-[![Code Climate](https://codeclimate.com/github/pretenderjs/pretender/badges/gpa.svg)](https://codeclimate.com/github/pretenderjs/pretender)
 
 Pretender is a mock server library in the style of Sinon (but built from microlibs. Because JavaScript)
 that comes with an express/sinatra style syntax for defining routes and their handlers.
@@ -119,7 +113,7 @@ server.get('/api/songs', (request) => {
 
 ### Pass-Through
 You can specify paths that should be ignored by pretender and made as real XHR requests.
-Enable these by specifying pass-through routes with `pretender.passthrough`:
+Enable these by specifying pass-through routes with `server.passthrough`:
 
 ```javascript
 server.get('/photos/:id', server.passthrough);
@@ -201,7 +195,7 @@ export function songsRoutes(){
 // a test
 
 import {authenticationRoutes, songsRoutes} from '../shared/routes';
-import Pretender from 'pretender';
+import Pretender from 'fetch-pretender';
 
 let server = new Pretender();
 server.map(authenticationRoutes);
