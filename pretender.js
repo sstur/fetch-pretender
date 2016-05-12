@@ -1,12 +1,7 @@
-(function(self) {
 'use strict';
 
-var appearsBrowserified = typeof self !== 'undefined' &&
-                          typeof process !== 'undefined' &&
-                          Object.prototype.toString.call(process) === '[object Object]';
-
-var RouteRecognizer = appearsBrowserified ? require('route-recognizer') : self.RouteRecognizer;
-var FakeXMLHttpRequest = appearsBrowserified ? require('fake-xml-http-request') : self.FakeXMLHttpRequest;
+var RouteRecognizer = require('route-recognizer');
+var FakeXMLHttpRequest = require('fake-xml-http-request');
 
 /**
  * parseURL - decompose a URL into its parts
@@ -95,11 +90,11 @@ function Pretender(/* routeMap1, routeMap2, ...*/) {
 
   // reference the native XMLHttpRequest object so
   // it can be restored later
-  this._nativeXMLHttpRequest = self.XMLHttpRequest;
+  this._nativeXMLHttpRequest = global.XMLHttpRequest;
 
   // capture xhr requests, channeling them into
   // the route map.
-  self.XMLHttpRequest = interceptor(this);
+  global.XMLHttpRequest = interceptor(this);
 
   // 'start' the server
   this.running = true;
@@ -408,7 +403,7 @@ Pretender.prototype = {
     return match;
   },
   shutdown: function shutdown() {
-    self.XMLHttpRequest = this._nativeXMLHttpRequest;
+    global.XMLHttpRequest = this._nativeXMLHttpRequest;
 
     // 'stop' the server
     this.running = false;
@@ -419,12 +414,4 @@ Pretender.parseURL = parseURL;
 Pretender.Hosts = Hosts;
 Pretender.Registry = Registry;
 
-if (typeof module === 'object') {
-  module.exports = Pretender;
-} else if (typeof define !== 'undefined') {
-  define('pretender', [], function() {
-    return Pretender;
-  });
-}
-self.Pretender = Pretender;
-}(self));
+module.exports = Pretender;
