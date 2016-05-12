@@ -2,6 +2,7 @@
 
 var RouteRecognizer = require('route-recognizer');
 var FakeXMLHttpRequest = require('fake-xml-http-request');
+var createFetch = require('fetchme');
 
 /**
  * parseURL - decompose a URL into its parts
@@ -79,7 +80,7 @@ Hosts.prototype.forURL = function(url) {
   return registry.verbs;
 };
 
-function Pretender(/* routeMap1, routeMap2, ...*/) {
+function Pretender() {
   this.hosts = new Hosts();
 
   this.handlers = [];
@@ -91,18 +92,23 @@ function Pretender(/* routeMap1, routeMap2, ...*/) {
   // reference the native XMLHttpRequest object so
   // it can be restored later
   this._nativeXMLHttpRequest = global.XMLHttpRequest;
+  this._nativeHeaders = global.Headers;
+  this._nativeRequest = global.Request;
+  this._nativeResponse = global.Response;
+  this._nativeFetch = global.fetch;
 
   // capture xhr requests, channeling them into
   // the route map.
-  global.XMLHttpRequest = interceptor(this);
+  var XMLHttpRequest = interceptor(this);
+  var fetchStuff = createFetch(XMLHttpRequest);
+  global.XMLHttpRequest = XMLHttpRequest;
+  global.Headers = fetchStuff.Headers;
+  global.Request = fetchStuff.Request;
+  global.Response = fetchStuff.Response;
+  global.fetch = fetchStuff.fetch;
 
   // 'start' the server
   this.running = true;
-
-  // trigger the route map DSL.
-  for (var i = 0; i < arguments.length; i++) {
-    this.map(arguments[i]);
-  }
 }
 
 function interceptor(pretender) {
@@ -265,9 +271,6 @@ Pretender.prototype = {
   'delete': verbify('DELETE'),
   patch: verbify('PATCH'),
   head: verbify('HEAD'),
-  map: function(maps) {
-    maps.call(this);
-  },
   register: function register(verb, url, handler, async) {
     if (!handler) {
       throw new Error('The function you tried passing to Pretender to handle ' +
@@ -404,6 +407,10 @@ Pretender.prototype = {
   },
   shutdown: function shutdown() {
     global.XMLHttpRequest = this._nativeXMLHttpRequest;
+    global.Headers = this._nativeHeaders;
+    global.Request = this._nativeRequest;
+    global.Response = this._nativeResponse;
+    global.fetch = this._nativeFetch;
 
     // 'stop' the server
     this.running = false;

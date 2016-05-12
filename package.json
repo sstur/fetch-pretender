@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "fake-xml-http-request": "^1.4.0",
-    "route-recognizer": "^0.1.9"
+    "route-recognizer": "^0.1.9",
+    "fetchme": "^2.0.0"
   }
 }
