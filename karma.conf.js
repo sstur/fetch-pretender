@@ -15,11 +15,7 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'bower_components/FakeXMLHttpRequest/fake_xml_http_request.js',
-      'bower_components/route-recognizer/dist/route-recognizer.js',
-      'bower_components/jquery-1/index.js',
-      'bower_components/jquery/dist/jquery.js',
-      'pretender.js',
+      'dist/pretender.js',
       'test/**/*.js'
     ],
 
@@ -32,7 +28,7 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-        'pretender.js': ['coverage']
+        'dist/pretender.js': ['coverage']
     },
 
     coverageReporter: {
@@ -66,7 +62,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'PhantomJS'],
+    browsers: [/*'Chrome', */'PhantomJS'],
 
 
     // Continuous Integration mode
