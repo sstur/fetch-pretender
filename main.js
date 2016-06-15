@@ -2,7 +2,7 @@
 'use strict';
 
 var RouteRecognizer = require('route-recognizer');
-var FakeXMLHttpRequest = require('fake-xml-http-request');
+var FakeXMLHttpRequest = require('xhr-pretender');
 var createFetch = require('fetchme');
 var urlLib = require('url');
 

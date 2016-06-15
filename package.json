@@ -34,8 +34,8 @@
     "qunitjs": "^1.20.0"
   },
   "dependencies": {
-    "fake-xml-http-request": "^1.4.0",
+    "fetchme": "^2.0.0",
     "route-recognizer": "^0.1.9",
-    "fetchme": "^2.0.0"
+    "xhr-pretender": "^1.4.0"
   }
 }
