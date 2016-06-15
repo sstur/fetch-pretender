@@ -6,6 +6,8 @@ var FakeXMLHttpRequest = require('fake-xml-http-request');
 var createFetch = require('fetchme');
 var urlLib = require('url');
 
+var baseURL = (typeof location !== 'undefined') && location.href || 'http://localhost/';
+
 /**
  * parseURL - decompose a URL into its parts
  * @param  {String} url a URL
@@ -24,7 +26,13 @@ var urlLib = require('url');
  * }
  */
 function parseURL(url) {
-  return urlLib.parse(url);
+  var fullURL = urlLib.resolve(baseURL, url);
+  var parsed = urlLib.parse(fullURL);
+  parsed.hash = parsed.hash || '';
+  parsed.search = parsed.search || '';
+  parsed.query = parsed.query || '';
+  parsed.fullpath = parsed.path + parsed.hash;
+  return parsed;
 }
 
 
